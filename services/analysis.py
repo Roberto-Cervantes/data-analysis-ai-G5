@@ -132,7 +132,13 @@ def distribution_for_column(dataframe: pd.DataFrame, column: str, limit: int = 2
     if pd.api.types.is_numeric_dtype(series):
         bins = min(limit, max(int(np.sqrt(len(series.dropna()))), 5))
         bucketed = pd.cut(series, bins=bins).astype("string").value_counts().sort_index()
-        return bucketed.reset_index().rename(columns={"index": "bucket", column: "count"})
+        result = bucketed.reset_index()
+        # Avoid duplicate column names by ensuring unique names
+        result.columns = ["bucket", "count"]
+        return result
 
     counts = series.astype("string").fillna("<NA>").value_counts().head(limit)
-    return counts.reset_index().rename(columns={"index": "value", column: "count"})
+    result = counts.reset_index()
+    # Avoid duplicate column names by ensuring unique names
+    result.columns = ["value", "count"]
+    return result
